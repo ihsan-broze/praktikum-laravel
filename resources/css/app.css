@@ -1,0 +1,44 @@
+/* custom.css - Modern UI enhancements */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Animasi Fade In */
+.fade-in {
+  animation: fadeIn 1s ease-in-out forwards;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Glow efek animasi */
+.glow {
+  animation: glow 1.5s infinite alternate;
+}
+@keyframes glow {
+  from { box-shadow: 0 0 5px #38bdf8; }
+  to { box-shadow: 0 0 15px #38bdf8; }
+}
+
+/* Tombol */
+.btn-primary {
+  @apply bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-all;
+}
+.btn-danger {
+  @apply bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-all;
+}
+
+/* Navbar & Sidebar */
+.navbar {
+  @apply bg-white shadow-md p-4 flex justify-between items-center;
+}
+.sidebar {
+  @apply w-64 h-screen bg-gray-800 text-white fixed top-0 left-0 p-5 space-y-4;
+}
+.sidebar a {
+  @apply block py-2 px-4 rounded hover:bg-gray-700;
+}
+.content {
+  @apply ml-64 p-6;
+}
