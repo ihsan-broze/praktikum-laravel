@@ -1,45 +1,42 @@
-FROM php:8.1-apache
+FROM php:8.1-fpm
 
-# Install dependencies
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
+    nginx \
     libpq-dev \
+    libpng-dev \
+    libzip-dev \
     zip \
     unzip \
-    && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
-    && docker-php-ext-install pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd
+    git \
+    curl
 
-# Get Composer
+# Install PHP extensions
+RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
+    && docker-php-ext-install pdo pdo_pgsql pgsql gd zip mbstring
+
+# Install composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Set working directory
-WORKDIR /var/www/html
+WORKDIR /var/www
 
-# Copy composer files first (for better caching)
-COPY composer.json composer.lock ./
-
-# Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader --no-interaction
-
-# Copy project files
+# Copy application
 COPY . .
 
+# Install dependencies
+RUN composer install --optimize-autoloader --no-dev
+
 # Set permissions
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html/storage \
-    && chmod -R 755 /var/www/html/bootstrap/cache
+RUN chown -R www-data:www-data /var/www \
+    && chmod -R 755 /var/www/storage
 
-# Configure Apache
-RUN a2enmod rewrite
-COPY .docker/apache.conf /etc/apache2/sites-available/000-default.conf
+# Configure nginx
+COPY .docker/nginx.conf /etc/nginx/sites-available/default
 
-# Laravel optimization
-RUN php artisan key:generate \
-    && php artisan config:cache
+# Start script
+COPY .docker/start.sh /start.sh
+RUN chmod +x /start.sh
 
 EXPOSE 80
-CMD ["apache2-foreground"]
+CMD ["/start.sh"]
